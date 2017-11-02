@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+div { float: left; width: 480px; }
+#solutions {
+    padding-top: 180px;
+    font-family: sans-serif;
+    font-weight: 700;
+    text-align: center;
+}
+#solutions span {
+    display: block;
+    font-family: monospace;
+    font-size: 72px;
+}
+.axis path, .axis line { display: none; }
+.square.white { fill: #eda; }
+.square.black { fill: #750; }
+</style>
+<body>
+<div id="solutions">Solutions found: <span>0</span></div>
+<div><svg>
+<defs>
+<pattern width="100%" height="100%" viewBox="0 0 112 112" id="queen">
+<path d="M102,38.919c0,4.734 -3.831,8.579 -8.556,8.579c-0.509,0 -1.004,-0.052 -1.49,-0.139l-6.235,35.802c-0.118,0.672 -0.769,0.99 -1.449,0.99l-26.971,0c-0.68,0 -1.793,0 -2.472,0l-27.981,0c-0.68,0 -1.331,-0.318 -1.448,-0.99l-6.234,-35.693c-0.2,0.014 -0.399,0.03 -0.602,0.03c-4.726,0 -8.562,-3.845 -8.562,-8.579c0,-4.734 3.837,-8.577 8.562,-8.577c4.732,0 8.562,3.843 8.562,8.577c0,2.382 -0.97,4.537 -2.537,6.092l11.334,10.6c0.497,0.465 1.302,0.456 1.789,-0.019l13.856,-13.517c-2.467,-1.506 -4.119,-4.22 -4.119,-7.326c0,-4.734 3.831,-8.575 8.555,-8.575c4.725,0 8.556,3.841 8.556,8.575c0,3.105 -1.652,5.819 -4.117,7.325l13.477,13.505c0.481,0.482 1.274,0.491 1.766,0.019l11.384,-10.97c-1.355,-1.519 -2.186,-3.515 -2.186,-5.712c0,-4.734 3.83,-8.576 8.562,-8.576c4.725,0.003 8.556,3.845 8.556,8.579Z" style="stroke:#000; stroke-width: 4; fill: #fff;"/>
+</pattern>
+<pattern width="100%" height="100%" viewBox="0 0 112 112" id="bad-queen">
+<path d="M102,38.919c0,4.734 -3.831,8.579 -8.556,8.579c-0.509,0 -1.004,-0.052 -1.49,-0.139l-6.235,35.802c-0.118,0.672 -0.769,0.99 -1.449,0.99l-26.971,0c-0.68,0 -1.793,0 -2.472,0l-27.981,0c-0.68,0 -1.331,-0.318 -1.448,-0.99l-6.234,-35.693c-0.2,0.014 -0.399,0.03 -0.602,0.03c-4.726,0 -8.562,-3.845 -8.562,-8.579c0,-4.734 3.837,-8.577 8.562,-8.577c4.732,0 8.562,3.843 8.562,8.577c0,2.382 -0.97,4.537 -2.537,6.092l11.334,10.6c0.497,0.465 1.302,0.456 1.789,-0.019l13.856,-13.517c-2.467,-1.506 -4.119,-4.22 -4.119,-7.326c0,-4.734 3.831,-8.575 8.555,-8.575c4.725,0 8.556,3.841 8.556,8.575c0,3.105 -1.652,5.819 -4.117,7.325l13.477,13.505c0.481,0.482 1.274,0.491 1.766,0.019l11.384,-10.97c-1.355,-1.519 -2.186,-3.515 -2.186,-5.712c0,-4.734 3.83,-8.576 8.562,-8.576c4.725,0.003 8.556,3.845 8.556,8.579Z" style="stroke:#000; stroke-width: 4; fill: #f00;"/>
+</pattern>
+</defs>
+</svg></div>
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script>
+var letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+var margin = { top: 25, right: 15, bottom: 25, left: 15 }
+var width = 480 - margin.left - margin.right
+var height = 500 - margin.top - margin.bottom
+
+var speed = 200
+var solutions = 0
+
+var svg = d3.select('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+    .append('g')
+    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+
+var x = d3.scaleBand()
+    .domain(d3.range(0, 8))
+    .rangeRound([0, width])
+
+var y = d3.scaleBand()
+    .domain(d3.range(0, 8))
+    .rangeRound([height, 0])
+
+var xAxis = d3.axisBottom()
+    .scale(x)
+    .tickFormat(function (i) { return letters[i] })
+
+var yAxis = d3.axisLeft()
+    .scale(y)
+    .tickFormat(function (i) { return i + 1 })
+
+svg.selectAll('square')
+    .data(d3.range(0, 8 * 8))
+    .enter().append('rect')
+    .attr('class', function (i) {
+        return 'square ' + ((i + Math.floor(i / 8)) % 2 ? 'white' : 'black')
+    })
+    .attr('x', function (i) { return x(i % 8) })
+    .attr('y', function (i) { return y(Math.floor(i / 8)) })
+    .attr('width', x.bandwidth())
+    .attr('height', y.bandwidth())
+
+svg.append('g')
+    .attr('class', 'x axis')
+    .attr('transform', 'translate(0,' + height + ')')
+    .call(xAxis)
+
+svg.append('g')
+    .attr('class', 'y axis')
+    .call(yAxis)
+
+function loop(board) {
+    if (!board) { return }
+
+    d3.select('#solutions span').text(solutions)
+
+    var queens = svg.selectAll('.queen')
+        .data(board)
+
+    queens.exit().remove()
+
+    queens = queens.enter().append('rect').merge(queens)
+
+    queens
+        .attr('class', 'queen')
+        .attr('x', function (d) { return x(d.x) })
+        .attr('y', function (d) { return y(d.y) })
+        .attr('width', x.bandwidth())
+        .attr('height', y.bandwidth())
+        .attr('fill', function (d) { return 'url(#' + (d.bad ? 'bad-' : '') + 'queen)' })
+
+    d3.timeout(function () { loop(board.next()) }, speed)
+}
+
+loop(function iterator(prevBoard, pop) {
+    var board, result
+    var x = -1
+    var y = prevBoard.length
+
+    return (function next() {
+        if (++x > 7) { return pop ? pop() : 0 }
+        board = prevBoard.slice()
+        board.push({ x: x, y: y })
+
+        result = check(board)
+
+        if (result.valid) {
+            if (y < 7) {
+                board.next = function () { return iterator(board, next) }
+            } else {
+                solutions++
+                board.next = pop
+            }
+            return board
+        }
+
+        result.board.next = next
+        return result.board
+    })()
+}([]))
+
+function check(board) {
+    var last = board.length - 1
+    var queenA = board[last]
+    var queenB, boardCopy
+    var i = -1
+
+    while (++i < last) {
+        queenB = board[i]
+
+        if (queenA.x === queenB.x || Math.abs(queenA.x - queenB.x) === last - i) {
+            boardCopy = board.slice()
+            boardCopy[last] = Object.assign({ bad: true }, queenA)
+            boardCopy[i] = Object.assign({ bad: true }, queenB)
+            return { valid: false, board: boardCopy }
+        }
+    }
+
+    return { valid: true, board: board }
+}
+
+</script>
+</body>
